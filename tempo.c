@@ -3,18 +3,28 @@
 #include <stdbool.h>
 #include "smpl.h"
 
+/* colors*/
+#define ANSI_COLOR_RED     "\x1b[31m"
+#define ANSI_COLOR_GREEN   "\x1b[32m"
+#define ANSI_COLOR_YELLOW  "\x1b[33m"
+#define ANSI_COLOR_BLUE    "\x1b[34m"
+#define ANSI_COLOR_MAGENTA "\x1b[35m"
+#define ANSI_COLOR_CYAN    "\x1b[36m"
+#define ANSI_COLOR_RESET   "\x1b[0m"
+
 /*evento*/
 
 #define test 1
 #define fault 2
 #define repair 3
 
+/* states */
 #define faulty 1
 #define fault_free 0
 #define unknown -1
 
-/*descritor nodo*/
 
+/*descritor nodo*/
 
 typedef struct {
 	int id;
@@ -57,7 +67,15 @@ void print_states(int id, int n_nodes){
 	int i;
 	printf("STATES [ ");
 	for(i=0; i < n_nodes;++i){
-		printf("%d ", nodo[id].states[i]);
+		if(nodo[id].states[i] == faulty){
+			printf(ANSI_COLOR_RED"x ");
+		}else if(nodo[id].states[i] == fault_free){
+			printf(ANSI_COLOR_GREEN"® ");
+		}else{
+			printf("* " );
+		}
+		printf(ANSI_COLOR_RESET);
+
 	}
 	printf("]\n");
 }
@@ -106,7 +124,7 @@ void main(int argc, char *argv[]){
 				if(status(nodo[token].id) != 0){
 					break;//falho
 				}
-				printf("o nodo %d vai testar no tempo %5.1f\n", token, time());
+				printf("[%5.1f] node "ANSI_COLOR_YELLOW"%d "ANSI_COLOR_BLUE "TEST "ANSI_COLOR_RESET " => ", time(), token);
 				make_tests(token,n);
 				print_states(token,n);
 				schedule(test, 30.0, token);
@@ -117,13 +135,13 @@ void main(int argc, char *argv[]){
 					puts("Impossivel falhar nodo");
 					exit(1);
 				}
-				printf("O nodo %d falhou no tempo %5.1f\n",token, time());
+				printf("[%5.1f] ***" ANSI_COLOR_RED "FAULT"ANSI_COLOR_RESET " on node "ANSI_COLOR_YELLOW"%d" ANSI_COLOR_RESET"***\n", time(), token);
 				nodo[token].states[token] = faulty;
 				break;
 
 			case repair:
 				release(nodo[token].id, token);
-				printf("O nodo %d recuperou no tempo %5.1f\n", token, time());
+				printf("[%5.1f] ***" ANSI_COLOR_GREEN "REPAIR"ANSI_COLOR_RESET " on node "ANSI_COLOR_YELLOW"%d" ANSI_COLOR_RESET"***\n", time(), token);
 				nodo[token].states[token] = fault_free;
 				schedule(test, 30.0, token);
 				break;
