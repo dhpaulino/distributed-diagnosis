@@ -17,6 +17,7 @@
 #define test 1
 #define fault 2
 #define repair 3
+#define round_event 4
 
 /* states */
 #define faulty 1
@@ -82,6 +83,7 @@ void print_states(int id, int n_nodes){
 void main(int argc, char *argv[]){
 	static int n, token, event, r, i;
 	static char fa_name[5];
+	int round_counter = 0;
 
 	/*faulty*/
 	if(argc!=2){
@@ -108,16 +110,16 @@ void main(int argc, char *argv[]){
 		}
 		nodo[i].states[i] = fault_free;
 	}
-
+	schedule(round_event, 10.0, 0);
 	for(i=0;i<n;++i){
-		schedule(test,30.0,i);
+		schedule(test,10.0,i);
 	}
-	schedule(fault, 31.0, 1);
-	schedule(repair, 69.0,1);
+	schedule(fault, 11.0, 1);
+	schedule(repair, n*10.0,1);
 
 
 
-	while( time() < 130.0){
+	while( time() < n*n*10.0){
 		cause(&event,&token);
 		switch(event){
 			case test:
@@ -127,7 +129,7 @@ void main(int argc, char *argv[]){
 				printf("[%5.1f] node "ANSI_COLOR_YELLOW"%d "ANSI_COLOR_BLUE "TEST "ANSI_COLOR_RESET " => ", time(), token);
 				make_tests(token,n);
 				print_states(token,n);
-				schedule(test, 30.0, token);
+				schedule(test, 10.0, token);
 				break;
 			case fault:
 				r = request(nodo[token].id,token,0);
@@ -143,8 +145,13 @@ void main(int argc, char *argv[]){
 				release(nodo[token].id, token);
 				printf("[%5.1f] ***" ANSI_COLOR_GREEN "REPAIR"ANSI_COLOR_RESET " on node "ANSI_COLOR_YELLOW"%d" ANSI_COLOR_RESET"***\n", time(), token);
 				nodo[token].states[token] = fault_free;
-				schedule(test, 30.0, token);
+				schedule(test, 10.0, token);
 				break;
+
+			case round_event:
+				round_counter++;
+				printf("***ROUND %d***\n", round_counter);
+				schedule(round_event, 10.0, token);
 		}
 	}
 
