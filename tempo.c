@@ -17,7 +17,7 @@
 #define test 1
 #define fault 2
 #define repair 3
-#define round_event 4
+#define round_end 4
 
 /* states */
 #define faulty 1
@@ -46,15 +46,13 @@ void copy_states(int tester_id, int tested_id, int n_nodes){
 	}
 }
 
-void make_tests(int id, int n_nodes){
+int make_tests(int id, int n_nodes){
 	int i;
-	bool found_fault_free = false;
-	for(i=next_node(id, n_nodes); i!=id && !found_fault_free;
-	 																										i=next_node(i, n_nodes)){
+	for(i=next_node(id, n_nodes); i!=id; i=next_node(i, n_nodes)){
 			if(nodo[i].states[i] == fault_free){
 				//printf("ENTROU id:%d i:%d\n", id, i);
 					copy_states(id, i, n_nodes);
-					found_fault_free = true;
+					return i;
 			}else if(nodo[i].states[i] == faulty){
 					nodo[id].states[i] = faulty;
 			}else{
@@ -62,6 +60,7 @@ void make_tests(int id, int n_nodes){
 				exit(1);
 			}
 	}
+	return id;
 }
 
 void print_states(int id, int n_nodes){
@@ -83,7 +82,8 @@ void print_states(int id, int n_nodes){
 void main(int argc, char *argv[]){
 	static int n, token, event, r, i;
 	static char fa_name[5];
-	int round_counter = 0;
+	int round_counter = 1;
+	int node_event, event_number, round_event, last_node_reached;
 
 	/*faulty*/
 	if(argc!=2){
@@ -110,12 +110,13 @@ void main(int argc, char *argv[]){
 		}
 		nodo[i].states[i] = fault_free;
 	}
-	schedule(round_event, 10.0, 0);
+
 	for(i=0;i<n;++i){
 		schedule(test,10.0,i);
 	}
 	schedule(fault, 11.0, 1);
 	schedule(repair, n*10.0,1);
+	schedule(round_end, 10.0, 0);
 
 
 
@@ -127,7 +128,14 @@ void main(int argc, char *argv[]){
 					break;//falho
 				}
 				printf("[%5.1f] node "ANSI_COLOR_YELLOW"%d "ANSI_COLOR_BLUE "TEST "ANSI_COLOR_RESET " => ", time(), token);
-				make_tests(token,n);
+				int fault_free_n = make_tests(token,n);
+				// if i'm the one who should test the node that the event happend
+				if(last_node_reached ==  -1 && next_node(token, n) == node_event){
+					last_node_reached = token;
+				}
+				if(next_node(token, n) == last_node_reached){
+					last_node_reached = token;
+				}
 				print_states(token,n);
 				schedule(test, 10.0, token);
 				break;
@@ -139,6 +147,10 @@ void main(int argc, char *argv[]){
 				}
 				printf("[%5.1f] ***" ANSI_COLOR_RED "FAULT"ANSI_COLOR_RESET " on node "ANSI_COLOR_YELLOW"%d" ANSI_COLOR_RESET"***\n", time(), token);
 				nodo[token].states[token] = faulty;
+				node_event = token;
+				event_number = fault;
+				round_event = round_counter;
+				last_node_reached = -1;
 				break;
 
 			case repair:
@@ -148,10 +160,16 @@ void main(int argc, char *argv[]){
 				schedule(test, 10.0, token);
 				break;
 
-			case round_event:
+			case round_end:
+				printf("*** END OF ROUND %d***\n", round_counter);
+				if(event_number != -1 && last_node_reached == next_node(node_event, n)){
+					printf("Event diagnoticed in %d rounds\n", round_counter-round_event);
+					event_number = -1;
+					last_node_reached = -1;
+				}
+				
+				schedule(round_end, 10.0, token);
 				round_counter++;
-				printf("***ROUND %d***\n", round_counter);
-				schedule(round_event, 10.0, token);
 		}
 	}
 
