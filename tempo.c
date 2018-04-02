@@ -157,7 +157,11 @@ void main(int argc, char *argv[]){
 				release(nodo[token].id, token);
 				printf("[%5.1f] ***" ANSI_COLOR_GREEN "REPAIR"ANSI_COLOR_RESET " on node "ANSI_COLOR_YELLOW"%d" ANSI_COLOR_RESET"***\n", time(), token);
 				nodo[token].states[token] = fault_free;
-				schedule(test, 10.0, token);
+                schedule(test, 10.0, token);
+                node_event = token;
+                event_number = repair;
+                round_event = round_counter;
+                last_node_reached = -1;
 				break;
 
 			case round_end:
