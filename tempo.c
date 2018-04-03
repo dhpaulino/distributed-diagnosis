@@ -86,15 +86,16 @@ void main(int argc, char *argv[]){
 	static char fa_name[5];
 	int round_counter = 1;
 	int node_event, event_number, round_event, last_node_reached, test_event_counter = 0;
-
+    int max_time;
 	/*faulty*/
-	if(argc!=2){
-		puts("Uso correto: tempo <num-nodo>");
+	if(argc!=3){
+		puts("Uso correto: tempo <num-nodo> <max-time>");
 		exit(1);
 	}
 
 	n = atoi(argv[1]);
-	smpl(0, "programa tempo");
+	max_time = atoi(argv[2]);
+    smpl(0, "programa tempo");
 	reset();
 	stream(1);
 
@@ -122,7 +123,7 @@ void main(int argc, char *argv[]){
 
 
 
-	while( time() < 2*n*10.0){
+	while( time() < max_time){
 		cause(&event,&token);
 		switch(event){
 			case test:
