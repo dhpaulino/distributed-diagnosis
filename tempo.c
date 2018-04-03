@@ -48,11 +48,13 @@ void copy_states(int tester_id, int tested_id, int n_nodes){
 
 int make_tests(int id, int n_nodes){
 	int i;
+    int test_counter=0;
 	for(i=next_node(id, n_nodes); i!=id; i=next_node(i, n_nodes)){
+			test_counter++;
 			if(nodo[i].states[i] == fault_free){
 				//printf("ENTROU id:%d i:%d\n", id, i);
 					copy_states(id, i, n_nodes);
-					return i;
+                    return test_counter;
 			}else if(nodo[i].states[i] == faulty){
 					nodo[id].states[i] = faulty;
 			}else{
@@ -60,7 +62,7 @@ int make_tests(int id, int n_nodes){
 				exit(1);
 			}
 	}
-	return id;
+	return test_counter;
 }
 
 void print_states(int id, int n_nodes){
@@ -83,7 +85,7 @@ void main(int argc, char *argv[]){
 	static int n, token, event, r, i;
 	static char fa_name[5];
 	int round_counter = 1;
-	int node_event, event_number, round_event, last_node_reached;
+	int node_event, event_number, round_event, last_node_reached, test_event_counter = 0;
 
 	/*faulty*/
 	if(argc!=2){
@@ -120,7 +122,7 @@ void main(int argc, char *argv[]){
 
 
 
-	while( time() < n*n*10.0){
+	while( time() < 2*n*10.0){
 		cause(&event,&token);
 		switch(event){
 			case test:
@@ -128,8 +130,11 @@ void main(int argc, char *argv[]){
 					break;//falho
 				}
 				printf("[%5.1f] node "ANSI_COLOR_YELLOW"%d "ANSI_COLOR_BLUE "TEST "ANSI_COLOR_RESET " => ", time(), token);
-				int fault_free_n = make_tests(token,n);
-				// if i'm the one who should test the node that the event happend
+				
+                if(token != node_event){
+                    test_event_counter  += make_tests(token,n);
+                }
+                // if i'm the one who should test the node that the event happend
 				if(last_node_reached ==  -1 && next_node(token, n) == node_event){
 					last_node_reached = token;
 				}
@@ -151,6 +156,7 @@ void main(int argc, char *argv[]){
 				event_number = fault;
 				round_event = round_counter;
 				last_node_reached = -1;
+			    test_event_counter = 0;	
 				break;
 
 			case repair:
@@ -162,15 +168,17 @@ void main(int argc, char *argv[]){
                 event_number = repair;
                 round_event = round_counter;
                 last_node_reached = -1;
-				break;
+			    test_event_counter = 0;
+                break;
 
 			case round_end:
 				printf("*** END OF ROUND %d***\n", round_counter);
 				if(event_number != -1 && last_node_reached == next_node(node_event, n)){
-					printf("Event diagnoticed in %d rounds\n", round_counter-round_event);
-					event_number = -1;
+					printf("Event diagnosed in %d rounds\n", round_counter-round_event+1);
+					printf("Number of tests: %d\n", test_event_counter);
+                    event_number = -1;
 					last_node_reached = -1;
-				}
+                }
 				
 				schedule(round_end, 10.0, token);
 				round_counter++;
