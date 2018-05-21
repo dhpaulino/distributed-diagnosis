@@ -170,6 +170,7 @@ void main(int argc, char *argv[]){
                 round_event = round_counter;
                 last_node_reached = -1;
 			    test_event_counter = 0;
+			    make_tests(token,n);
                 break;
 
 			case round_end:
