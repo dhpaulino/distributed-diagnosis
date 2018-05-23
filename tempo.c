@@ -3,6 +3,44 @@
 #include <stdbool.h>
 #include "smpl.h"
 
+/***================================LIST======================================*/
+#include <stdlib.h>
+#include <stdbool.h>
+
+struct List{
+  int size;
+  int max_qtd_elements;
+  int* data;
+};
+
+typedef struct List* List;
+List init(int max_qtd_elements){
+  List list = malloc(sizeof(struct List));
+  list->size = 0;
+  list->max_qtd_elements = max_qtd_elements;
+  list->data = malloc(sizeof(int)*max_qtd_elements);
+
+  return list;
+}
+
+bool add(List list, int element){
+  if(list->size==list->max_qtd_elements){
+    return false;
+  }
+  list->data[list->size++] = element;
+
+  return true;
+
+}
+void set_size(List list, int size){
+  list->size = size;
+}
+void clean(List list){
+  free(list->data);
+  free(list);
+}
+
+/**/
 /* colors*/
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_GREEN   "\x1b[32m"
@@ -29,7 +67,7 @@
 
 typedef struct {
 	int id;
-	int* states;
+	int *states;
 } tnodo;
 
 tnodo *nodo;
@@ -131,7 +169,7 @@ void main(int argc, char *argv[]){
 					break;//falho
 				}
 				printf("[%5.1f] node "ANSI_COLOR_YELLOW"%d "ANSI_COLOR_BLUE "TEST "ANSI_COLOR_RESET " => ", time(), token);
-				
+
                 if(token != node_event){
                     test_event_counter  += make_tests(token,n);
                 }
@@ -157,7 +195,7 @@ void main(int argc, char *argv[]){
 				event_number = fault;
 				round_event = round_counter;
 				last_node_reached = -1;
-			    test_event_counter = 0;	
+			    test_event_counter = 0;
 				break;
 
 			case repair:
@@ -181,7 +219,7 @@ void main(int argc, char *argv[]){
                     event_number = -1;
 					last_node_reached = -1;
                 }
-				
+
 				schedule(round_end, 10.0, token);
 				round_counter++;
 		}
