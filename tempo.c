@@ -72,22 +72,22 @@ int make_tests(int id, int n_nodes){
 	return test_counter;
 }
 
-void print_states(int id, int n_nodes){
-	int i;
-	printf("STATES [ ");
-	for(i=0; i < n_nodes;++i){
-		if(nodo[id].states[i] == faulty){
-			printf(ANSI_COLOR_RED"x ");
-		}else if(nodo[id].states[i] == fault_free){
-			printf(ANSI_COLOR_GREEN"® ");
-		}else{
-			printf("* " );
-		}
-		printf(ANSI_COLOR_RESET);
+// void print_states(int id, int n_nodes){
+// 	int i;
+// 	printf("STATES [ ");
+// 	for(i=0; i < n_nodes;++i){
+// 		if(nodo[id].states[i] == faulty){
+// 			printf(ANSI_COLOR_RED"x ");
+// 		}else if(nodo[id].states[i] == fault_free){
+// 			printf(ANSI_COLOR_GREEN"® ");
+// 		}else{
+// 			printf("* " );
+// 		}
+// 		printf(ANSI_COLOR_RESET);
 
-	}
-	printf("]\n");
-}
+// 	}
+// 	printf("]\n");
+// }
 void main(int argc, char *argv[]){
 	static int n, token, event, r, i;
 	static char fa_name[5];
@@ -110,10 +110,6 @@ void main(int argc, char *argv[]){
 
     Network* network = init_network(n);
 
-    //TESTE
-    calculate_test_list(network, 0, network->qty_nodes);
-    //run_tests(network, 5);
-    //FIM TESTE
 	for(i=0; i<n; ++i){
 		memset(fa_name,'\0',5);
 		sprintf(fa_name,"%d",i);
@@ -124,6 +120,12 @@ void main(int argc, char *argv[]){
 			nodo[i].states[j] = unknown;
 		}
 		nodo[i].states[i] = fault_free;
+
+		//VCUBE
+		calculate_test_list(network, i);
+	}
+	for(i=0;i<network->qty_nodes;++i){
+		run_tests(network, i);
 	}
 
 	for(i=0;i<n;++i){
@@ -142,19 +144,20 @@ void main(int argc, char *argv[]){
 				if(status(nodo[token].id) != 0){
 					break;//falho
 				}
-				printf("[%5.1f] node "ANSI_COLOR_YELLOW"%d "ANSI_COLOR_BLUE "TEST "ANSI_COLOR_RESET " => ", time(), token);
+				run_tests(network, token);
+				 printf("[%5.1f] node "ANSI_COLOR_YELLOW"%d "ANSI_COLOR_BLUE "TEST "ANSI_COLOR_RESET " => ", time(), token);
 
-                if(token != node_event){
-                    test_event_counter  += make_tests(token,n);
-                }
-                // if i'm the one who should test the node that the event happend
-				if(last_node_reached ==  -1 && next_node(token, n) == node_event){
-					last_node_reached = token;
-				}
-				if(next_node(token, n) == last_node_reached){
-					last_node_reached = token;
-				}
-				print_states(token,n);
+    //             if(token != node_event){
+    //                 test_event_counter  += make_tests(token,n);
+    //             }
+    //             // if i'm the one who should test the node that the event happend
+				// if(last_node_reached ==  -1 && next_node(token, n) == node_event){
+				// 	last_node_reached = token;
+				// }
+				// if(next_node(token, n) == last_node_reached){
+				// 	last_node_reached = token;
+				// }
+				print_states(network->nodes[token], network->qty_nodes);
 				schedule(test, 10.0, token);
 				break;
 			case fault:
@@ -163,36 +166,38 @@ void main(int argc, char *argv[]){
 					puts("Impossivel falhar nodo");
 					exit(1);
 				}
+				network->nodes[token].states[token]++;
 				printf("[%5.1f] ***" ANSI_COLOR_RED "FAULT"ANSI_COLOR_RESET " on node "ANSI_COLOR_YELLOW"%d" ANSI_COLOR_RESET"***\n", time(), token);
-				nodo[token].states[token] = faulty;
-				node_event = token;
-				event_number = fault;
-				round_event = round_counter;
-				last_node_reached = -1;
-			    test_event_counter = 0;
+				// nodo[token].states[token] = faulty;
+				// node_event = token;
+				// event_number = fault;
+				// round_event = round_counter;
+				// last_node_reached = -1;
+			 //    test_event_counter = 0;
 				break;
 
 			case repair:
 				release(nodo[token].id, token);
 				printf("[%5.1f] ***" ANSI_COLOR_GREEN "REPAIR"ANSI_COLOR_RESET " on node "ANSI_COLOR_YELLOW"%d" ANSI_COLOR_RESET"***\n", time(), token);
-				nodo[token].states[token] = fault_free;
+				// nodo[token].states[token] = fault_free;
+				network->nodes[token].states[token]++;
                 schedule(test, 10.0, token);
-                node_event = token;
-                event_number = repair;
-                round_event = round_counter;
-                last_node_reached = -1;
-			    test_event_counter = 0;
-			    make_tests(token,n);
+       //          node_event = token;
+       //          event_number = repair;
+       //          round_event = round_counter;
+       //          last_node_reached = -1;
+			    // test_event_counter = 0;
+			    // make_tests(token,n);
                 break;
 
 			case round_end:
 				printf("*** END OF ROUND %d***\n", round_counter);
-				if(event_number != -1 && last_node_reached == next_node(node_event, n)){
-					printf("Event diagnosed in %d rounds\n", round_counter-round_event+1);
-					printf("Number of tests: %d\n", test_event_counter);
-                    event_number = -1;
-					last_node_reached = -1;
-                }
+				// if(event_number != -1 && last_node_reached == next_node(node_event, n)){
+				// 	printf("Event diagnosed in %d rounds\n", round_counter-round_event+1);
+				// 	printf("Number of tests: %d\n", test_event_counter);
+    //                 event_number = -1;
+				// 	last_node_reached = -1;
+    //             }
 
 				schedule(round_end, 10.0, token);
 				round_counter++;

@@ -21,6 +21,13 @@ bool add_list(List list, int element){
   return true;
 
 }
+int get_list(List list, unsigned int index){
+  return list->data[index];
+}
+
+unsigned int get_size_list(List list){
+  return list->size;
+}
 void set_size_list(List list, int size){
   list->size = size;
 }
