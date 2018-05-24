@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "list.h"
+#include <stdio.h>
 
 List init_list(int max_qtd_elements){
   List list = malloc(sizeof(struct List));
@@ -26,4 +27,9 @@ void set_size_list(List list, int size){
 void clean_list(List list){
   free(list->data);
   free(list);
+}
+void print_list(List list){
+    for(int i=0;i<list->size;++i){
+        printf("i:%d\n", list->data[i]);
+    }
 }

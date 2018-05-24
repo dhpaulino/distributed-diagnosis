@@ -2,43 +2,12 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "smpl.h"
+#include "list.h"
+#include "vcube.c"
 
 /***================================LIST======================================*/
 #include <stdlib.h>
 #include <stdbool.h>
-
-struct List{
-  int size;
-  int max_qtd_elements;
-  int* data;
-};
-
-typedef struct List* List;
-List init(int max_qtd_elements){
-  List list = malloc(sizeof(struct List));
-  list->size = 0;
-  list->max_qtd_elements = max_qtd_elements;
-  list->data = malloc(sizeof(int)*max_qtd_elements);
-
-  return list;
-}
-
-bool add(List list, int element){
-  if(list->size==list->max_qtd_elements){
-    return false;
-  }
-  list->data[list->size++] = element;
-
-  return true;
-
-}
-void set_size(List list, int size){
-  list->size = size;
-}
-void clean(List list){
-  free(list->data);
-  free(list);
-}
 
 /**/
 /* colors*/
@@ -139,7 +108,12 @@ void main(int argc, char *argv[]){
 
 	nodo = (tnodo*)malloc(sizeof(tnodo)*n);
 
+    Network* network = init_network(n);
 
+    //TESTE
+    calculate_test_list(network, 0, network->qty_nodes);
+    //run_tests(network, 5);
+    //FIM TESTE
 	for(i=0; i<n; ++i){
 		memset(fa_name,'\0',5);
 		sprintf(fa_name,"%d",i);

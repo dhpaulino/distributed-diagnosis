@@ -14,4 +14,5 @@ List init_list(int max_qtd_elements);
 bool add_list(List list, int element);
 void set_size_list(List list, int size);
 void clean_list(List list);
+void print_list(List list);
 #endif

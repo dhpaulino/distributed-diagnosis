@@ -12,7 +12,14 @@ tempo.o: tempo.c smpl.h
 rand.o: rand.c
 	$(COMPILE.c) -g rand.c
 
-list.o: list.h list.c 
+list.o: list.h list.c
 	$(COMPILE.c) -g list.c
+
+vcube.o: vcube.c cijs.o list.o
+	$(COMPILE.c) -g vcube.c 
+
+cisj.o: cijs.c
+	$(COMPILE.c) -g cisj.c
+
 clean:
 	$(RM) *.o tempo relat saida
