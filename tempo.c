@@ -123,6 +123,8 @@ void main(int argc, char *argv[]){
 
 		//VCUBE
 		calculate_test_list(network, i);
+		printf("Node: %d\n",i);
+		// print_list(network->nodes[i].tests);
 	}
 	for(i=0;i<network->qty_nodes;++i){
 		run_tests(network, i);
@@ -131,8 +133,11 @@ void main(int argc, char *argv[]){
 	for(i=0;i<n;++i){
 		schedule(test,10.0,i);
 	}
-	schedule(fault, 11.0, 1);
-	schedule(repair, n*10.0,1);
+	schedule(fault, 11.0, 2);
+	schedule(fault, 11.0, 3);
+	schedule(fault, 11.0, 4);
+	schedule(fault, 11.0, 6);
+	//schedule(repair, n*10.0,1);
 	schedule(round_end, 10.0, 0);
 
 

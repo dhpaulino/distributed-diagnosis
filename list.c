@@ -37,6 +37,6 @@ void clean_list(List list){
 }
 void print_list(List list){
     for(int i=0;i<list->size;++i){
-        printf("i:%d\n", list->data[i]);
+        printf("[%d]:%d\n", i, list->data[i]);
     }
 }
