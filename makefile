@@ -15,11 +15,8 @@ rand.o: rand.c
 list.o: list.h list.c
 	$(COMPILE.c) -g list.c
 
-vcube.o: vcube.c cijs.o list.o
-	$(COMPILE.c) -g vcube.c 
-
-cisj.o: cijs.c
-	$(COMPILE.c) -g cisj.c
+vcube.o: vcube.c list.o
+	$(COMPILE.c) -g vcube.c
 
 clean:
-	$(RM) *.o tempo relat saida
+	$(RM) *.o tempo

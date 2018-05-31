@@ -1,4 +1,3 @@
-#include "list.h"
 #include <stdbool.h>
 #include "math.h"
 #include "list.h"
@@ -68,9 +67,9 @@ void calculate_test_list(Network* network, unsigned int index_node){
         //iterate over all clusters
         for(int j=1;j<=qty_cluster;j++){
             int size_default_tests = pow(2,j-1);
-             unsigned int* default_tests = cis(i, j);
+            unsigned int* default_tests = cis(i, j);
              //iterate over all nodes from cluster j, ordered with offset i%2^(j-1)
-             for(int k=0;k<size_default_tests;k++){
+            for(int k=0;k<size_default_tests;k++){
                 //TODO: test if node is failed not just check if someone knows that
                 if(is_node_fault_free(node.states[default_tests[k]])){
                     if(default_tests[k] == index_node){
@@ -79,7 +78,7 @@ void calculate_test_list(Network* network, unsigned int index_node){
                     break;
                 }
             }
-             free(default_tests);
+            free(default_tests);
         }
     }
 }
@@ -118,8 +117,8 @@ Network* init_network(unsigned int qty_nodes){
 
     for(int i=0; i < qty_nodes; ++i){
       calculate_test_list(network, i);
-    }
-    return network;
+  }
+  return network;
 }
 
 unsigned int run_tests(Network* network, unsigned int index_node){

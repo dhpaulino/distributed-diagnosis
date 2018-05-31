@@ -5,10 +5,6 @@
 #include "list.h"
 #include "vcube.c"
 
-/***================================LIST======================================*/
-#include <stdlib.h>
-#include <stdbool.h>
-
 /**/
 /* colors*/
 #define ANSI_COLOR_RED     "\x1b[31m"
