@@ -36,7 +36,12 @@ void clean_list(List list){
   free(list);
 }
 void print_list(List list){
-    for(int i=0;i<list->size;++i){
-        printf("[%d]:%d\n", i, list->data[i]);
+  printf("{");
+    if(list->size > 0){
+      printf("%d", list->data[0]);
     }
+    for(int i=1;i<list->size;++i){
+        printf(", %d", list->data[i]);
+    }
+    printf("}\n");
 }

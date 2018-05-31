@@ -60,7 +60,6 @@ double log2(double x) {
     return log(x) / log(2);
 }
 void calculate_test_list(Network* network, unsigned int index_node){
-    printf("====> CALCULATING TEST LIST OF %u <===\n", index_node);
     unsigned int qty_cluster = (unsigned int) log2(network->qty_nodes);
     Node node = network->nodes[index_node];
     set_size_list(node.tests, 0);
@@ -126,13 +125,16 @@ Network* init_network(unsigned int qty_nodes){
         }
     }
     network->qty_nodes = qty_nodes;
+
+    for(int i=0; i < qty_nodes; ++i){
+      calculate_test_list(network, i);
+    }
     return network;
 }
 
 
-void run_tests(Network* network, unsigned int index_node){
+unsigned int run_tests(Network* network, unsigned int index_node){
     bool novelty = false;
-    //TODO: iterate over test list
     List tests = network->nodes[index_node].tests;
     unsigned int qty_tests = get_size_list(tests);
     for(int i=0;i<qty_tests;++i){
@@ -140,7 +142,7 @@ void run_tests(Network* network, unsigned int index_node){
 
         for(int j=0;j<network->qty_nodes;++j){
             if(network->nodes[index_node].states[j] < network->nodes[index_testing].states[j]){
-                printf("!!!NOVIDADE!!! => N:%u T:%d I:%d S:%u < %u\n", index_node, index_testing, j, network->nodes[index_node].states[j], network->nodes[index_testing].states[j]);
+                printf("    !!!NEWS DETECTED FROM NODE %u: change at node %u!!!\n", index_testing, j);
                 network->nodes[index_node].states[j] =  network->nodes[index_testing].states[j];
                 novelty = true;
             }
@@ -148,9 +150,12 @@ void run_tests(Network* network, unsigned int index_node){
         
     }
     if(novelty){
-        calculate_test_list(network, index_node);  
+        calculate_test_list(network, index_node);
+        printf("    Recalculated test list: ");
         print_list(network->nodes[index_node].tests);
     }
+
+    return qty_tests;
 }
 void print_states(Node node, unsigned int qty_nodes){
     int i;
