@@ -25,11 +25,6 @@
 #define fault 2
 #define repair 3
 #define round_end 4
-#define initialize
-/* states */
-#define faulty 1
-#define fault_free 0
-#define unknown -1
 
 
 typedef struct{
@@ -49,6 +44,7 @@ void init_event_info(Event_info* event_info, unsigned node_number, unsigned int 
 
 }
 void update_event_situation(Event_info* event_info, Network* network){
+    //TODO: verify only for the corrected nodes
     bool reach_all_nodes = true;
     for(int i=0; i < network->qty_nodes && reach_all_nodes; ++i){
         if(network->nodes[i].states[event_info->node_number] < event_info->node_state){
@@ -90,10 +86,7 @@ void main(int argc, char *argv[]){
         schedule(test,10.0,i);
     }
     schedule(fault, 11.0, 3);
-    // schedule(fault, 11.0, 3);
-    // schedule(fault, 11.0, 4);
-    // schedule(fault, 11.0, 6);
-    //schedule(repair, n*10.0,1);
+    schedule(repair, 40.0,3);
     schedule(round_end, 10.0, 0);
 
 
@@ -104,11 +97,11 @@ void main(int argc, char *argv[]){
 
             case test:
                 if(status(network->nodes[token].id) != 0){
-                    break;//falho
-                }
+                        break;//failed
+                    }
                 printf("[%4.1f] Node "ANSI_COLOR_YELLOW"%d " ANSI_COLOR_BLUE"TESTS: "ANSI_COLOR_RESET, time(), token);
-                print_list(network->nodes[token].tests);
-                unsigned int qty_tests = run_tests(network, token);
+                print_list(network->nodes[token].tests);  
+                unsigned int qty_tests = run_tests(network, token);   
                 if(!event_info.diagnosed){
                     event_info.tests_counter += qty_tests;
                 }
@@ -116,10 +109,11 @@ void main(int argc, char *argv[]){
                 print_states(network->nodes[token], network->qty_nodes);
                 schedule(test, 10.0, token);
                 break;
+
             case fault:
                 r = request(network->nodes[token].id,token,0);
                 if(r!=0){
-                    puts("Impossivel falhar nodo");
+                    puts("Impossible to fail node");
                     exit(1);
                 }
                 network->nodes[token].states[token]++;
@@ -133,7 +127,6 @@ void main(int argc, char *argv[]){
                 network->nodes[token].states[token]++;
                 init_event_info(&event_info, token, network->nodes[token].states[token]);
                 schedule(test, 10.0, token);
-     
                 break;
 
             case round_end:
@@ -146,7 +139,7 @@ void main(int argc, char *argv[]){
                 printf("--------END OF ROUND %d--------\n\n", round_counter);
                 schedule(round_end, 10.0, token);
                 round_counter++;
+            }
         }
+        destroy_network(network);
     }
-
-}
